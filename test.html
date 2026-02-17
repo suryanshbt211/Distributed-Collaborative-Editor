@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Collaborative Editor</title>
+</head>
+
+<body>
+
+<h2>Collaborative Editor</h2>
+
+<p id="status">Connecting...</p>
+
+<textarea id="editor" rows="20" cols="80"></textarea>
+
+<p id="cursor-info"></p>
+
+<script>
+
+let ws;
+let reconnectInterval = 2000;
+
+let editor = document.getElementById("editor");
+let status = document.getElementById("status");
+let cursorInfo = document.getElementById("cursor-info");
+
+
+function connect() {
+
+    status.innerText = "Connecting...";
+
+    ws = new WebSocket("ws://127.0.0.1:8000/ws/doc1");
+
+
+    ws.onopen = function() {
+
+        status.innerText = "Connected";
+        console.log("Connected");
+    };
+
+
+    ws.onmessage = function(event) {
+
+        let data = JSON.parse(event.data);
+
+        if (data.type === "init" || data.type === "edit") {
+
+            editor.value = data.content;
+        }
+
+        if (data.type === "cursor") {
+
+            cursorInfo.innerText =
+                "Other user cursor at position: " + data.position;
+        }
+    };
+
+
+    ws.onclose = function() {
+
+        status.innerText = "Disconnected - reconnecting...";
+
+        setTimeout(connect, reconnectInterval);
+    };
+
+
+    ws.onerror = function(error) {
+
+        console.log("WebSocket error:", error);
+
+        ws.close();
+    };
+}
+
+
+// send edits
+editor.addEventListener("input", function() {
+
+    if (!ws || ws.readyState !== WebSocket.OPEN)
+        return;
+
+    ws.send(JSON.stringify({
+
+        type: "edit",
+        content: editor.value
+    }));
+});
+
+
+// send cursor
+editor.addEventListener("click", function() {
+
+    if (!ws || ws.readyState !== WebSocket.OPEN)
+        return;
+
+    ws.send(JSON.stringify({
+
+        type: "cursor",
+        position: editor.selectionStart
+    }));
+});
+
+
+connect();
+
+</script>
+
+</body>
+</html>
