@@ -1,8 +1,8 @@
 # Distributed Real-Time Collaborative Editor
 
-A production-grade distributed real-time collaborative document editor built using FastAPI, WebSockets, Redis Pub/Sub, PostgreSQL, Docker, and Conflict-Free Replicated Data Types (CRDT). This system enables multiple users to simultaneously edit documents with real-time synchronization, persistent version history, and horizontally scalable distributed backend architecture.
+A production-grade distributed real-time collaborative document editor built using FastAPI, WebSockets, Redis Pub/Sub, PostgreSQL, Docker, and Conflict-Free Replicated Data Types (CRDT). This system enables multiple users to simultaneously edit shared documents with low-latency synchronization, persistent version history, and horizontally scalable backend architecture.
 
-This project demonstrates advanced backend engineering, distributed systems design, event-driven architecture, and real-time state synchronization similar to systems used in Google Docs, Notion, and Figma.
+This project demonstrates advanced backend engineering, distributed systems design, real-time event-driven architecture, and synchronization mechanisms similar to Google Docs, Notion, and Figma.
 
 ---
 
@@ -18,24 +18,24 @@ Demo Video: https://your-demo-video
 - System Overview
 - Full System Architecture
 - Component Architecture
-- Detailed Interaction Flow
-- Distributed Synchronization Architecture
+- Interaction Flow
+- Distributed Synchronization Design
 - Database Architecture
 - CRDT Conflict Resolution
 - Scalability Design
-- Fault Tolerance Design
+- Fault Tolerance
 - Technology Stack
 - Folder Structure
 - Setup Instructions
 - Running the System
-- Verifying Database Persistence
+- Verifying Persistence
 - Engineering Concepts Demonstrated
 
 ---
 
 # System Overview
 
-This system enables multiple users to edit shared documents simultaneously with low-latency synchronization and persistent storage.
+This system allows multiple users to edit shared documents simultaneously while maintaining consistent state across all connected clients.
 
 Core capabilities:
 
@@ -43,74 +43,75 @@ Core capabilities:
 - Conflict-free synchronization using CRDT
 - Distributed synchronization using Redis Pub/Sub
 - Persistent storage using PostgreSQL
-- Document version history tracking
+- Version history tracking
 - Snapshot-based persistence optimization
 - Horizontally scalable backend architecture
-- Fault-tolerant distributed system design
-- Containerized infrastructure using Docker
+- Fault-tolerant distributed design
+- Containerized deployment using Docker
 
 ---
 
 # Full System Architecture
 
-                ┌────────────────────┐
-                │     User A         │
-                │     Browser        │
-                └─────────┬──────────┘
-                          │ WebSocket
-                          ▼
-                 ┌────────────────────┐
-                 │   FastAPI Backend │
-                 │   Instance #1     │
-                 └─────────┬─────────┘
-                           │
-          ┌────────────────┴───────────────┐
-          ▼                                ▼
-  ┌───────────────┐               ┌───────────────┐
-  │ Redis Pub/Sub │               │ PostgreSQL DB │
-  │ Sync Layer    │               │ Persistence   │
-  └───────┬───────┘               └───────┬───────┘
-          │                               │
-          ▼                               │
-  ┌───────────────┐                     │
-  │ FastAPI Backend│                     │
-  │ Instance #2    │                     │
-  └─────────┬──────┘                     │
-            │                            │
-            ▼                            │
-     ┌───────────────┐                  │
-     │     User B     │                 │
-     │     Browser    │                 │
-     └───────────────┘                 │
+```
+                    ┌────────────────────┐
+                    │     User A         │
+                    │     Browser        │
+                    └─────────┬──────────┘
+                              │ WebSocket
+                              ▼
+                     ┌────────────────────┐
+                     │   FastAPI Backend │
+                     │   Instance #1     │
+                     └─────────┬─────────┘
+                               │
+              ┌────────────────┴───────────────┐
+              ▼                                ▼
+      ┌───────────────┐               ┌───────────────┐
+      │ Redis Pub/Sub │               │ PostgreSQL DB │
+      │ Sync Layer    │               │ Persistence   │
+      └───────┬───────┘               └───────┬───────┘
+              │                               │
+              ▼                               │
+      ┌───────────────┐                     │
+      │ FastAPI Backend│                     │
+      │ Instance #2    │                     │
+      └─────────┬──────┘                     │
+                │                            │
+                ▼                            │
+         ┌───────────────┐                  │
+         │     User B     │                 │
+         │     Browser    │                 │
+         └───────────────┘                 │
+```
 
 ---
 
 # Component Architecture
 
-## 1. Client Layer
+## Client Layer
 
-Responsible for user interaction.
+Handles user interaction and communication with backend.
+
+Responsibilities:
+
+- Send edit operations via WebSocket
+- Receive updates from backend
+- Render synchronized document state
 
 Components:
 
 - Browser UI
-- WebSocket Client
-- Text Editor
-
-Responsibilities:
-
-- Capture user input
-- Send updates to backend
-- Receive synchronized updates
-- Display real-time document state
+- WebSocket client
+- Editor interface
 
 ---
 
-## 2. Backend Layer (FastAPI)
+## Backend Layer (FastAPI)
 
-Central distributed coordination layer.
+Central coordination layer.
 
-Core modules:
+Modules:
 
 - WebSocket Manager
 - Connection Manager
@@ -120,67 +121,344 @@ Core modules:
 
 Responsibilities:
 
-- Manage WebSocket connections
+- Handle WebSocket connections
 - Process edit events
-- Maintain in-memory CRDT state
-- Broadcast updates to clients
+- Maintain in-memory document state
+- Broadcast updates
 - Persist document versions
 
 ---
 
-## 3. Synchronization Layer (Redis Pub/Sub)
+## Redis Synchronization Layer
 
-Distributed message broker.
+Responsible for distributed messaging.
 
 Responsibilities:
 
-- Synchronize multiple backend nodes
-- Broadcast document updates across instances
-- Maintain distributed consistency
-
-Enables horizontal scaling.
+- Synchronize backend instances
+- Broadcast updates across nodes
+- Maintain distributed state consistency
 
 ---
 
-## 4. Persistence Layer (PostgreSQL)
+## Persistence Layer (PostgreSQL)
 
-Persistent storage system.
+Stores document state and version history.
 
-Stores:
+Responsibilities:
 
-- Latest document state
-- Version history
-- Document snapshots
-
-Enables fault recovery.
+- Store current document content
+- Maintain version history
+- Support rollback and recovery
 
 ---
 
-# Detailed Interaction Flow
+# Interaction Flow
 
-## Step 1: Client connects
+Step 1: Client connects
 
-User opens editor in browser.
-
-Connection established:
-
+```
+Browser → WebSocket → FastAPI Backend
+```
 
 Backend registers connection.
 
 ---
 
-## Step 2: Document loading
+Step 2: Document loads
 
-Backend loads document from database:
+```
+FastAPI → PostgreSQL → Load document
+```
 
-
-Document loaded into CRDT memory.
+Backend loads document into CRDT memory.
 
 Backend sends initial state to client.
 
 ---
 
-## Step 3: User edits document
+Step 3: User edits document
 
-User types text:
+```
+Browser → WebSocket → FastAPI Backend
+```
 
+Backend updates CRDT state.
+
+CRDT ensures conflict-free synchronization.
+
+---
+
+Step 4: Distributed broadcast
+
+```
+FastAPI → Redis Pub/Sub → Other backend nodes → Clients
+```
+
+Ensures all clients receive update.
+
+---
+
+Step 5: Persistence
+
+```
+FastAPI → PostgreSQL → Save snapshot
+```
+
+Ensures persistent state.
+
+---
+
+# Distributed Synchronization Design
+
+Redis enables backend synchronization.
+
+```
+Backend Instance A
+        │
+        ▼
+    Redis Pub/Sub
+        │
+        ▼
+Backend Instance B
+        │
+        ▼
+    Client B
+```
+
+Ensures horizontal scalability.
+
+---
+
+# Database Architecture
+
+Documents Table:
+
+```
+documents
+---------
+id
+content
+version
+```
+
+Stores latest state.
+
+---
+
+Document Versions Table:
+
+```
+document_versions
+-----------------
+id
+document_id
+content
+version_number
+```
+
+Stores version history.
+
+---
+
+# CRDT Conflict Resolution
+
+CRDT ensures conflict-free editing.
+
+Example:
+
+User A writes:
+
+```
+Hello
+```
+
+User B writes simultaneously:
+
+```
+World
+```
+
+Final state:
+
+```
+Hello World
+```
+
+No conflicts occur.
+
+---
+
+# Scalability Design
+
+Supports multiple backend nodes:
+
+```
+Load Balancer
+      │
+ ┌────┴────┐
+ │ Backend │
+ │ Backend │
+ └────┬────┘
+      │
+     Redis
+      │
+ PostgreSQL
+```
+
+Enables large-scale concurrent users.
+
+---
+
+# Fault Tolerance
+
+If backend crashes:
+
+```
+Restart → Load state from PostgreSQL
+```
+
+Ensures persistence.
+
+---
+
+# Technology Stack
+
+Backend:
+
+- FastAPI
+- Python
+- AsyncIO
+- WebSockets
+
+Distributed Systems:
+
+- Redis Pub/Sub
+
+Database:
+
+- PostgreSQL
+
+Infrastructure:
+
+- Docker
+- Docker Compose
+
+Synchronization:
+
+- CRDT
+
+Frontend:
+
+- HTML
+- JavaScript
+
+---
+
+# Folder Structure
+
+```
+collab-platform/
+│
+├── backend/
+│   ├── app/
+│   │   ├── main.py
+│   │   ├── websocket_manager.py
+│   │   ├── crdt.py
+│   │   ├── crdt_manager.py
+│   │   ├── document_service.py
+│   │   ├── snapshot_manager.py
+│   │   ├── database.py
+│   │   ├── models.py
+│   │   └── redis_client.py
+│   │
+│   ├── Dockerfile
+│   └── requirements.txt
+│
+├── docker-compose.yml
+├── test.html
+└── README.md
+```
+
+---
+
+# Setup Instructions
+
+Prerequisites:
+
+- Docker
+- Docker Compose
+- Git
+
+---
+
+Clone repository:
+
+```
+git clone https://github.com/yourusername/distributed-collaborative-editor.git
+
+cd distributed-collaborative-editor
+```
+
+---
+
+Run system:
+
+```
+docker compose up --build
+```
+
+---
+
+Open editor:
+
+```
+http://localhost:8000
+```
+
+---
+
+# Verify Persistence
+
+Connect to database:
+
+```
+docker exec -it collab_postgres psql -U collab_user -d collab_db
+```
+
+Run:
+
+```
+SELECT * FROM documents;
+
+SELECT * FROM document_versions;
+```
+
+---
+
+# Engineering Concepts Demonstrated
+
+- Distributed systems
+- Real-time synchronization
+- Event-driven architecture
+- WebSocket communication
+- CRDT conflict resolution
+- Distributed messaging
+- Persistent storage design
+- Horizontal scaling
+- Containerized deployment
+- Production-grade backend engineering
+
+---
+
+# Author
+
+Suryansh Talukdar
+
+GitHub: https://github.com/suryanshbt211
+
+---
+
+# License
+
+MIT License
