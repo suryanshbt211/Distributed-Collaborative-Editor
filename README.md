@@ -7,7 +7,7 @@ A distributed, low-latency collaborative document editor built using FastAPI, We
 ## Demo
 
 - Live Demo: https://your-demo-link  
-- Demo Video: https://your-video-link  
+
 
 ---
 
