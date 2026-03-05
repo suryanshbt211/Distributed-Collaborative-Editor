@@ -6,10 +6,7 @@ This project demonstrates advanced backend engineering, distributed systems desi
 
 ---
 
-# Live Demo
 
-Live Deployment: https://your-live-link  
-Demo Video: https://your-demo-video  
 
 ---
 
