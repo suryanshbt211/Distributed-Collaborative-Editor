@@ -45,7 +45,9 @@ Core capabilities:
 - Horizontally scalable backend architecture
 - Fault-tolerant distributed design
 - Containerized deployment using Docker
+# Real-Time Sequence Flow
 
+User → WebSocket → Backend → CRDT → Broadcast → Redis → Other Clients → DB
 ---
 
 # Full System Architecture
@@ -455,6 +457,13 @@ Suryansh Talukdar
 GitHub: https://github.com/suryanshbt211
 
 ---
+# Why This Project Matters
+
+This project demonstrates real-world distributed system design similar to:
+
+- Google Docs
+- Notion
+- Figmac
 
 # License
 
