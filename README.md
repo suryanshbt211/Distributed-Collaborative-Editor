@@ -92,7 +92,9 @@ User → WebSocket → Backend → CRDT → Broadcast → Redis → Other Client
    └───────────────┘
                   
 ```
-
+User → Backend → CRDT → Redis → Other Backend → Other Users
+                    ↓
+                 PostgreSQL
 ---
 
 # Component Architecture
