@@ -54,34 +54,43 @@ User → WebSocket → Backend → CRDT → Broadcast → Redis → Other Client
 
 ```
                     ┌────────────────────┐
-                    │     User A         │
+                    │      User A        │
                     │     Browser        │
                     └─────────┬──────────┘
                               │ WebSocket
                               ▼
-                     ┌────────────────────┐
-                     │   FastAPI Backend │
-                     │   Instance #1     │
-                     └─────────┬─────────┘
-                               │
-              ┌────────────────┴───────────────┐
-              ▼                                ▼
-      ┌───────────────┐               ┌───────────────┐
-      │ Redis Pub/Sub │               │ PostgreSQL DB │
-      │ Sync Layer    │               │ Persistence   │
-      └───────┬───────┘               └───────┬───────┘
-              │                               │
-              ▼                               │
-      ┌───────────────┐                     │
-      │ FastAPI Backend│                     │
-      │ Instance #2    │                     │
-      └─────────┬──────┘                     │
-                │                            │
-                ▼                            │
-         ┌───────────────┐                  │
-         │     User B     │                 │
-         │     Browser    │                 │
-         └───────────────┘                 │
+                   ┌───────────────────────┐
+                   │   FastAPI Backend     │
+                   │   (Instance #1)       │
+                   │ ────────────────────  │
+                   │ WebSocket Manager     │
+                   │ CRDT Engine           │
+                   │ Connection Manager    │
+                   └───────┬───────────────┘
+                           │
+        ┌──────────────────┼──────────────────┐
+        ▼                  ▼                  ▼
+┌────────────────┐  ┌────────────────┐  ┌────────────────┐
+│ Redis Pub/Sub  │  │ PostgreSQL DB │  │ Local Clients  │
+│ (Sync Layer)   │  │ (Persistence) │  │ (WebSockets)   │
+└──────┬─────────┘  └────────────────┘  └────────────────┘
+       │
+       ▼
+┌───────────────────────────┐
+│   FastAPI Backend         │
+│   (Instance #2)           │
+│ ────────────────────────  │
+│ WebSocket Manager         │
+│ CRDT Engine               │
+│ Connection Manager        │
+└─────────┬─────────────────┘
+          │
+          ▼
+   ┌───────────────┐
+   │    User B     │
+   │    Browser    │
+   └───────────────┘
+                  
 ```
 
 ---
